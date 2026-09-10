@@ -1,9 +1,18 @@
+version: '3.8'
+
 services:
   app:
     build: .
     container_name: laravel_app
     restart: unless-stopped
     working_dir: /var/www/html
+    depends_on:
+      - db
+    environment:
+      - DB_HOST=db
+      - DB_DATABASE=hotel_db
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
     volumes:
       - .:/var/www/html
     networks:
@@ -18,17 +27,20 @@ services:
     volumes:
       - .:/var/www/html
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - app
     networks:
       - hotel-net
 
   frontend:
-      build: ./my-hotel-frontend
-      container_name: react_frontend
-      restart: unless-stopped
-      ports:
-        - "5173:5173"
-      networks:
-        - hotel-net
+    build: ./my-hotel-frontend
+    container_name: react_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    networks:
+      - hotel-net
+
   db:
     image: mysql:8.0
     container_name: mysql_db
